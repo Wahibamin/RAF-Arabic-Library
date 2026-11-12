@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}المكتبة الرقمية - الكتب{% endblock %}
+
+{% block content %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h2 class="mb-4">المكتبة الرقمية - تصفح الكتب</h2>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <form method="get" action="{% url 'catalog:book_list' %}">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" name="q" placeholder="ابحث باسم الكتاب، الوصف، المؤلف، أو التصنيف..." value="{{ q }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="category">
+                                <option value="">كل التصنيفات</option>
+                                {% for cat in categories %}
+                                    <option value="{{ cat.pk }}" {% if selected_category == cat.pk|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" name="author">
+                                <option value="">كل المؤلفين</option>
+                                {% for auth in authors %}
+                                    <option value="{{ auth.pk }}" {% if selected_author == auth.pk|stringformat:"s" %}selected{% endif %}>{{ auth.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-grid gap-2 d-md-block text-end">
+                            <button type="submit" class="btn btn-primary">بحث</button>
+                            <a href="{% url 'catalog:book_list' %}" class="btn btn-outline-secondary">مسح</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if q or selected_category or selected_author %}
+            <h4 class="mb-4">نتائج البحث</h4>
+        {% endif %}
+
+        {% if books %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for book in books %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'catalog:book_detail' book.pk %}" class="text-decoration-none text-dark">{{ book.title }}</a>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <a href="{% url 'catalog:author_detail' book.author.pk %}" class="text-decoration-none">{{ book.author.name }}</a>
+                            </h6>
+                            <p class="card-text">
+                                <strong>التصنيف:</strong> <a href="{% url 'catalog:category_detail' book.category.pk %}" class="text-decoration-none">{{ book.category.name }}</a><br>
+                                {% if book.publication_year %}
+                                <strong>سنة النشر:</strong> {{ book.publication_year }}<br>
+                                {% endif %}
+                            </p>
+                            {% if book.description %}
+                            <p class="card-text small">{{ book.description|truncatewords:20 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center" role="alert">
+                لا توجد كتب متاحة حالياً.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
